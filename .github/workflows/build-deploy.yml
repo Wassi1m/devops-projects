@@ -40,19 +40,18 @@ jobs:
 
       - name: Test .NET
         run: dotnet test projet/BourseIA/BourseIA.csproj --no-build --verbosity normal
-
       # ─── Python ───────────────────────────────────────────────
       - name: Setup Python 3.11
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
-      - name: Check workspace (debug safe)
+      - name: Verify structure (debug)
         run: |
           pwd
           ls -la
-          ls -la coin_ai || true
-          ls -la coin_ai/requirements.txt || true
+          ls -la coin_ai
+          ls -la coin_ai/requirements.txt
 
       - name: Install Python dependencies
         working-directory: coin_ai
@@ -65,7 +64,6 @@ jobs:
         working-directory: coin_ai
         run: |
           flake8 . --max-line-length=120 --exclude=venv,__pycache__,data_set,models || true
-                
       # ─── SonarCloud ───────────────────────────────────────────
       - name: SonarCloud Analysis
         uses: SonarSource/sonarcloud-github-action@v2.3.0
