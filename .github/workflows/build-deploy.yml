@@ -31,15 +31,17 @@ jobs:
         with:
           dotnet-version: '8.0.x'
 
+      # ─── .NET FIX (chemin correct projet) ─────────────────────
       - name: Restore .NET dependencies
-        run: dotnet restore
+        run: dotnet restore projet/BourseIA/BourseIA.csproj
 
       - name: Build .NET
-        run: dotnet build --no-restore -c Release
+        run: dotnet build projet/BourseIA/BourseIA.csproj --no-restore -c Release
 
       - name: Test .NET
-        run: dotnet test --no-build --verbosity normal
+        run: dotnet test projet/BourseIA/BourseIA.csproj --no-build --verbosity normal
 
+      # ─── Python ───────────────────────────────────────────────
       - name: Setup Python 3.11
         uses: actions/setup-python@v5
         with:
@@ -54,6 +56,7 @@ jobs:
         run: |
           flake8 coin_ai/ --max-line-length=120 --exclude=venv,__pycache__,data_set,models || true
 
+      # ─── SonarCloud ───────────────────────────────────────────
       - name: SonarCloud Analysis
         uses: SonarSource/sonarcloud-github-action@v2.3.0
         env:
@@ -63,7 +66,6 @@ jobs:
           args: >
             -Dsonar.projectKey=bourseia_coin-system
             -Dsonar.organization=bourseia
-
 
 # ─────────────────────────────────────────────
 # 2. SECURITY SCAN (TRIVY)
