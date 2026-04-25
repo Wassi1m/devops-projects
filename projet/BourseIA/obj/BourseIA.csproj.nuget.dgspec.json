@@ -1,25 +1,26 @@
 {
   "format": 1,
   "restore": {
-    "/app/BourseIA.csproj": {}
+    "/home/user/Bureau/2 eme cycle/2eme cycle 2semestre/dotnet/coin/projet/BourseIA/BourseIA.csproj": {}
   },
   "projects": {
-    "/app/BourseIA.csproj": {
+    "/home/user/Bureau/2 eme cycle/2eme cycle 2semestre/dotnet/coin/projet/BourseIA/BourseIA.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/app/BourseIA.csproj",
+        "projectUniqueName": "/home/user/Bureau/2 eme cycle/2eme cycle 2semestre/dotnet/coin/projet/BourseIA/BourseIA.csproj",
         "projectName": "BourseIA",
-        "projectPath": "/app/BourseIA.csproj",
-        "packagesPath": "/root/.nuget/packages/",
-        "outputPath": "/app/obj/",
+        "projectPath": "/home/user/Bureau/2 eme cycle/2eme cycle 2semestre/dotnet/coin/projet/BourseIA/BourseIA.csproj",
+        "packagesPath": "/home/user/.nuget/packages/",
+        "outputPath": "/home/user/Bureau/2 eme cycle/2eme cycle 2semestre/dotnet/coin/projet/BourseIA/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "/root/.nuget/NuGet/NuGet.Config"
+          "/home/user/.nuget/NuGet/NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net8.0"
         ],
         "sources": {
+          "/usr/lib/dotnet/library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -37,7 +38,8 @@
           "enableAudit": "true",
           "auditLevel": "low",
           "auditMode": "direct"
-        }
+        },
+        "SdkAnalysisLevel": "10.0.100"
       },
       "frameworks": {
         "net8.0": {
@@ -91,6 +93,20 @@
           ],
           "assetTargetFallback": true,
           "warn": true,
+          "downloadDependencies": [
+            {
+              "name": "Microsoft.AspNetCore.App.Ref",
+              "version": "[8.0.26, 8.0.26]"
+            },
+            {
+              "name": "Microsoft.NETCore.App.Host.linux-x64",
+              "version": "[8.0.26, 8.0.26]"
+            },
+            {
+              "name": "Microsoft.NETCore.App.Ref",
+              "version": "[8.0.26, 8.0.26]"
+            }
+          ],
           "frameworkReferences": {
             "Microsoft.AspNetCore.App": {
               "privateAssets": "none"
@@ -99,7 +115,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "/usr/share/dotnet/sdk/8.0.420/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "/usr/lib/dotnet/sdk/10.0.107/PortableRuntimeIdentifierGraph.json"
         }
       }
     }

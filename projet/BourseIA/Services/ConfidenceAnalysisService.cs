@@ -14,9 +14,9 @@ public interface IConfidenceAnalysisService
     ConfidenceAnalysisDto AnalyzePredictions(PredictionResponseDto response, decimal threshold = 0.7m);
 
     /// <summary>
-    /// Filtre les prédictions par seuil de confiance
+    /// Filtre les prédictions par seuil de confiance (above=true → ≥ seuil, false → &lt; seuil)
     /// </summary>
-    List<PredictionDto> FilterByConfidence(List<PredictionDto> predictions, decimal threshold);
+    List<PredictionDto> FilterByConfidence(List<PredictionDto> predictions, decimal threshold, bool above = true);
 
     /// <summary>
     /// Calcule le score de confiance global
