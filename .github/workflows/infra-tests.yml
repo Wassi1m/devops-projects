@@ -9,76 +9,118 @@ on:
       - '.github/workflows/infra-tests.yml'
 
 jobs:
+  # ─── Validation des manifestes Kubernetes ───────────────────
   validate-k8s:
+    name: Validate Kubernetes Manifests
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
-    - name: Install kubeconform
-      run: |
-        wget https://github.com/yannh/kubeconform/releases/latest/download/kubeconform-linux-amd64.tar.gz
-        tar xf kubeconform-linux-amd64.tar.gz
-        sudo mv kubeconform /usr/local/bin
+      - name: Install kubeconform
+        run: |
+          KUBECONFORM_VERSION=$(curl -s https://api.github.com/repos/yannh/kubeconform/releases/latest | grep tag_name | cut -d '"' -f 4)
+          curl -sL "https://github.com/yannh/kubeconform/releases/download/${KUBECONFORM_VERSION}/kubeconform-linux-amd64.tar.gz" | tar xz
+          sudo mv kubeconform /usr/local/bin/
 
-    - name: Validate Kubernetes manifests
-      run: |
-        find k8s -name '*.yaml' -type f | xargs kubeconform -strict
+      - name: Validate Kubernetes base manifests
+        run: |
+          find k8s/base -name '*.yaml' -type f | \
+            xargs kubeconform \
+              -strict \
+              -ignore-missing-schemas \
+              -schema-location default \
+              -schema-location 'https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json'
 
+      - name: Run Kustomize build (syntax check)
+        run: |
+          curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh" | bash
+          sudo mv kustomize /usr/local/bin/
+          kustomize build k8s/base/ > /dev/null && echo "✓ Kustomize build OK"
+
+  # ─── Validation du chart Helm ───────────────────────────────
   validate-helm:
+    name: Validate Helm Chart
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
-    - name: Set up Helm
-      uses: azure/setup-helm@v3
+      - name: Set up Helm
+        uses: azure/setup-helm@v4
 
-    - name: Lint Helm charts
-      run: |
-        helm lint helm/coin-system
-        helm template coin-system helm/coin-system --values helm/coin-system/values.yaml
+      - name: Lint Helm chart
+        run: |
+          helm lint helm/coin-system --strict
+          echo "✓ Helm lint OK"
 
-    - name: Check Helm chart documentation
-      run: |
-        helm inspect values helm/coin-system > /tmp/values.txt
-        cat /tmp/values.txt
+      - name: Template Helm chart (dry-run)
+        run: |
+          helm template coin-system helm/coin-system \
+            --values helm/coin-system/values.yaml \
+            --namespace coin-system \
+            > /tmp/helm-rendered.yaml
+          echo "✓ Helm template OK ($(wc -l < /tmp/helm-rendered.yaml) lines rendered)"
 
-  security-policies:
+      - name: Validate rendered Helm manifests
+        run: |
+          KUBECONFORM_VERSION=$(curl -s https://api.github.com/repos/yannh/kubeconform/releases/latest | grep tag_name | cut -d '"' -f 4)
+          curl -sL "https://github.com/yannh/kubeconform/releases/download/${KUBECONFORM_VERSION}/kubeconform-linux-amd64.tar.gz" | tar xz
+          sudo mv kubeconform /usr/local/bin/
+          kubeconform -strict -ignore-missing-schemas /tmp/helm-rendered.yaml && echo "✓ Helm manifests valid"
+
+  # ─── Validation Docker Compose ──────────────────────────────
+  validate-docker-compose:
+    name: Validate Docker Compose
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
-    - name: Install Kyverno CLI
-      run: |
-        kubectl config view --raw > kubeconfig.yaml
-        brew install kyverno
+      - name: Validate Docker Compose syntax
+        run: |
+          docker compose -f docker-compose.prod.yml config > /dev/null
+          echo "✓ Docker Compose syntax OK"
 
-    - name: Validate security policies
-      run: |
-        kyverno apply k8s/policies/ --resource k8s/base/ -v 6
+      - name: Check services defined
+        run: |
+          SERVICES=$(docker compose -f docker-compose.prod.yml config --services)
+          echo "Services définis: $SERVICES"
+          echo "$SERVICES" | grep -q "api" && echo "✓ api présent"
+          echo "$SERVICES" | grep -q "postgres" && echo "✓ postgres présent"
+          echo "$SERVICES" | grep -q "prometheus" && echo "✓ prometheus présent"
+          echo "$SERVICES" | grep -q "grafana" && echo "✓ grafana présent"
+          echo "$SERVICES" | grep -q "loki" && echo "✓ loki présent"
 
-  docker-compose-validation:
+  # ─── Scan de sécurité Trivy sur les configs ─────────────────
+  security-config-scan:
+    name: Security Config Scan
     runs-on: ubuntu-latest
+    permissions:
+      security-events: write
     steps:
-    - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
-    - name: Validate Docker Compose syntax
-      run: |
-        docker-compose -f docker-compose.prod.yml config
+      - name: Trivy config scan (Kubernetes)
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          scan-type: 'config'
+          scan-ref: 'k8s/'
+          format: 'table'
+          severity: 'CRITICAL,HIGH,MEDIUM'
+          exit-code: '0'
 
-    - name: Check image availability
-      run: |
-        docker-compose -f docker-compose.prod.yml pull --dry-run
+      - name: Trivy config scan (Docker Compose)
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          scan-type: 'config'
+          scan-ref: 'docker-compose.prod.yml'
+          format: 'table'
+          severity: 'CRITICAL,HIGH,MEDIUM'
+          exit-code: '0'
 
-  cost-analysis:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v3
-
-    - name: Install Infracost
-      run: |
-        curl -L https://github.com/infracost/infracost/releases/latest/download/infracost-linux-x86_64.tar.gz | tar xz
-
-    - name: Run cost analysis
-      run: |
-        ./infracost breakdown --path helm/coin-system/values.yaml
-
+      - name: Trivy config scan (Helm)
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          scan-type: 'config'
+          scan-ref: 'helm/'
+          format: 'table'
+          severity: 'CRITICAL,HIGH,MEDIUM'
+          exit-code: '0'

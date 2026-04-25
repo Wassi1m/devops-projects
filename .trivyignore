@@ -1,0 +1,25 @@
+# Trivy ignore file - false positives or accepted risks
+# Format: CVE-YYYY-NNNNN or vulnerability ID
+# See: https://aquasecurity.github.io/trivy/latest/docs/configuration/filtering/
+
+# ── Python / Alpine ──────────────────────────────────────────────────────────
+# setuptools: no fix available in Alpine base layer
+CVE-2024-6345
+
+# pip: only used during build stage (not present in runtime image)
+CVE-2023-5752
+
+# ── .NET / ASP.NET ───────────────────────────────────────────────────────────
+# Development-only packages (not in Dockerfile.prod runtime stage)
+# Add specific CVEs here if needed after trivy scan review
+
+# ── PostgreSQL client ────────────────────────────────────────────────────────
+# libpq in Alpine: patched in next Alpine release
+# CVE-XXXX-XXXXX
+
+# ── Dev / test files ─────────────────────────────────────────────────────────
+# Ignore scan in virtual environments and generated files
+coin_ai/venv/
+coin_ai/data_set/
+projet/BourseIA/bin/
+projet/BourseIA/obj/
