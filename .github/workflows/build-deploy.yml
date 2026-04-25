@@ -48,14 +48,17 @@ jobs:
           python-version: '3.11'
 
       - name: Install Python dependencies
+        working-directory: coin_ai
         run: |
-          pip install -r coin_ai/requirements.txt
+          pip install -r requirements.txt
           pip install pytest pytest-cov flake8
 
       - name: Lint Python (flake8)
+        working-directory: coin_ai
         run: |
-          flake8 coin_ai/ --max-line-length=120 --exclude=venv,__pycache__,data_set,models || true
+          flake8 . --max-line-length=120 --exclude=venv,__pycache__,data_set,models || true
 
+          
       # ─── SonarCloud ───────────────────────────────────────────
       - name: SonarCloud Analysis
         uses: SonarSource/sonarcloud-github-action@v2.3.0
