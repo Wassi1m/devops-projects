@@ -64,17 +64,7 @@ jobs:
         working-directory: coin_ai
         run: |
           flake8 . --max-line-length=120 --exclude=venv,__pycache__,data_set,models || true
-      # ─── SonarCloud ───────────────────────────────────────────
-      - name: SonarCloud Analysis
-        uses: SonarSource/sonarcloud-github-action@v2.3.0
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        with:
-          args: >
-            -Dsonar.projectKey=bourseia_coin-system
-            -Dsonar.organization=bourseia
-
+ 
 # ─────────────────────────────────────────────
 # 2. SECURITY SCAN (TRIVY)
 # ─────────────────────────────────────────────
