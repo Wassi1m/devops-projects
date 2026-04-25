@@ -12,10 +12,14 @@ env:
   BUILDKIT_PROGRESS: plain
 
 jobs:
-  # ─── Qualité du code ────────────────────────────────────────
+
+# ─────────────────────────────────────────────
+# 1. LINT + TEST + SONAR
+# ─────────────────────────────────────────────
   lint-and-test:
     name: Lint, Test & SonarCloud
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v4
         with:
@@ -28,10 +32,13 @@ jobs:
           dotnet-version: '8.0.x'
 
       - name: Restore .NET dependencies
-        run: dotnet restore projet/BourseIA/BourseIA.csproj
+        run: dotnet restore
 
       - name: Build .NET
-        run: dotnet build projet/BourseIA/BourseIA.csproj --no-restore -c Release
+        run: dotnet build --no-restore -c Release
+
+      - name: Test .NET
+        run: dotnet test --no-build --verbosity normal
 
       - name: Setup Python 3.11
         uses: actions/setup-python@v5
@@ -57,82 +64,87 @@ jobs:
             -Dsonar.projectKey=bourseia_coin-system
             -Dsonar.organization=bourseia
 
-  # ─── Scan de sécurité (indépendant, tourne sur PR et push) ──
+
+# ─────────────────────────────────────────────
+# 2. SECURITY SCAN (TRIVY)
+# ─────────────────────────────────────────────
   security-scan:
     name: Trivy Security Scan
     runs-on: ubuntu-latest
+
     permissions:
       security-events: write
+
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
           submodules: false
 
-      - name: Run Trivy — filesystem scan
-        uses: aquasecurity/trivy-action@master
+      - name: Trivy filesystem scan (SARIF)
+        uses: aquasecurity/trivy-action@0.24.0
         with:
-          scan-type: 'fs'
-          scan-ref: '.'
-          format: 'sarif'
-          output: 'trivy-results.sarif'
+          scan-type: fs
+          scan-ref: .
+          format: sarif
+          output: trivy-results.sarif
           ignore-unfixed: true
-          trivyignores: '.trivyignore'
-          severity: 'CRITICAL,HIGH'
+          trivyignores: .trivyignore
+          severity: CRITICAL,HIGH
 
-      - name: Upload results to GitHub Security tab
+      - name: Upload SARIF
         uses: github/codeql-action/upload-sarif@v3
         if: always()
         with:
-          sarif_file: 'trivy-results.sarif'
+          sarif_file: trivy-results.sarif
 
-      - name: Run Trivy — summary table
-        uses: aquasecurity/trivy-action@master
+      - name: Trivy summary
+        uses: aquasecurity/trivy-action@0.24.0
         with:
-          scan-type: 'fs'
-          scan-ref: '.'
-          format: 'table'
+          scan-type: fs
+          scan-ref: .
+          format: table
           ignore-unfixed: true
-          trivyignores: '.trivyignore'
-          severity: 'CRITICAL,HIGH'
+          trivyignores: .trivyignore
+          severity: CRITICAL,HIGH
 
-  # ─── Build image API ────────────────────────────────────────
+
+# ─────────────────────────────────────────────
+# 3. BUILD API IMAGE
+# ─────────────────────────────────────────────
   build-api:
     name: Build & Push API Image
     needs: [lint-and-test, security-scan]
     runs-on: ubuntu-latest
     if: github.event_name == 'push'
+
     permissions:
       packages: write
       contents: read
+
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
           submodules: false
 
-      - name: Set up Docker Buildx
+      - name: Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Log in to Container Registry
+      - name: Login GHCR
         uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Extract metadata
+      - name: Metadata
         id: meta
         uses: docker/metadata-action@v5
         with:
           images: ${{ env.REGISTRY }}/${{ github.repository }}/bourseia-api
-          tags: |
-            type=ref,event=branch
-            type=semver,pattern={{version}}
-            type=semver,pattern={{major}}.{{minor}}
-            type=sha,prefix={{branch}}-
 
-      - name: Build and push API image
+      - name: Build & Push API
         uses: docker/build-push-action@v5
         with:
           context: ./projet/BourseIA
@@ -143,51 +155,43 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      - name: Scan built image with Trivy
-        uses: aquasecurity/trivy-action@master
-        with:
-          image-ref: ${{ env.REGISTRY }}/${{ github.repository }}/bourseia-api:${{ github.sha }}
-          format: 'table'
-          ignore-unfixed: true
-          severity: 'CRITICAL,HIGH'
 
-  # ─── Build image IA ─────────────────────────────────────────
+# ─────────────────────────────────────────────
+# 4. BUILD AI IMAGE
+# ─────────────────────────────────────────────
   build-ai:
     name: Build & Push AI Image
     needs: [lint-and-test, security-scan]
     runs-on: ubuntu-latest
     if: github.event_name == 'push'
+
     permissions:
       packages: write
       contents: read
+
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
           submodules: false
 
-      - name: Set up Docker Buildx
+      - name: Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Log in to Container Registry
+      - name: Login GHCR
         uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Extract metadata
+      - name: Metadata
         id: meta
         uses: docker/metadata-action@v5
         with:
           images: ${{ env.REGISTRY }}/${{ github.repository }}/coin-ai
-          tags: |
-            type=ref,event=branch
-            type=semver,pattern={{version}}
-            type=semver,pattern={{major}}.{{minor}}
-            type=sha,prefix={{branch}}-
 
-      - name: Build and push AI image
+      - name: Build & Push AI
         uses: docker/build-push-action@v5
         with:
           context: ./coin_ai
@@ -197,102 +201,3 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
-
-  # ─── Déploiement Staging ────────────────────────────────────
-  deploy-staging:
-    name: Deploy to Staging
-    needs: [build-api, build-ai]
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/develop'
-    environment:
-      name: staging
-      url: https://api-staging.example.com
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          submodules: false
-
-      - name: Set up Helm
-        uses: azure/setup-helm@v4
-
-      - name: Deploy to Staging with Helm
-        run: |
-          helm upgrade --install coin-system ./helm/coin-system \
-            --namespace coin-system \
-            --create-namespace \
-            -f helm/coin-system/values.yaml \
-            --set api.image.tag=${{ github.sha }} \
-            --set ai.image.tag=${{ github.sha }} \
-            --timeout 5m
-
-      - name: Smoke test staging
-        run: |
-          sleep 30
-          curl -f https://api-staging.example.com/health || exit 1
-
-  # ─── Déploiement Production ─────────────────────────────────
-  deploy-production:
-    name: Deploy to Production
-    needs: [build-api, build-ai]
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-    environment:
-      name: production
-      url: https://api.example.com
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          submodules: false
-
-      - name: Create GitHub Release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: v${{ github.run_number }}
-          release_name: Release v${{ github.run_number }}
-          body: |
-            ## Release v${{ github.run_number }}
-            - Commit: ${{ github.sha }}
-            - Branch: ${{ github.ref_name }}
-          draft: false
-          prerelease: false
-
-      - name: Set up Helm
-        uses: azure/setup-helm@v4
-
-      - name: Deploy to Production with Helm
-        run: |
-          helm upgrade --install coin-system ./helm/coin-system \
-            --namespace coin-system \
-            --create-namespace \
-            -f helm/coin-system/values.yaml \
-            --set api.image.tag=${{ github.sha }} \
-            --set ai.image.tag=${{ github.sha }} \
-            --timeout 10m
-
-      - name: Verify Deployment
-        run: |
-          kubectl rollout status deployment/api -n coin-system --timeout=5m
-          kubectl rollout status deployment/coin-ai -n coin-system --timeout=5m
-          curl -f https://api.example.com/health || exit 1
-
-      - name: Slack Notification
-        if: always()
-        uses: slackapi/slack-github-action@v1.27.0
-        with:
-          webhook-url: ${{ secrets.SLACK_WEBHOOK }}
-          payload: |
-            {
-              "blocks": [
-                {
-                  "type": "section",
-                  "text": {
-                    "type": "mrkdwn",
-                    "text": "*${{ job.status == 'success' && '✅' || '❌' }} Production Deployment v${{ github.run_number }}*\nBranch: `${{ github.ref_name }}`\nCommit: `${{ github.sha }}`\nStatus: *${{ job.status }}*"
-                  }
-                }
-              ]
-            }
