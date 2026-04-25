@@ -201,3 +201,49 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+# ─────────────────────────────────────────────
+# 5. DEPLOY — SSH → VM → docker compose up
+# ─────────────────────────────────────────────
+  deploy-production:
+    name: Deploy to Server (SSH + Docker Compose)
+    needs: [build-api, build-ai]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+
+    environment:
+      name: production
+
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            set -e
+
+            # Aller dans le répertoire du projet sur le serveur
+            cd ~/coin
+
+            # Récupérer la dernière version du code
+            git pull origin main
+
+            # Se connecter au registry GHCR pour puller les images
+            echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io \
+              -u ${{ github.actor }} --password-stdin
+
+            # Mettre à jour les images (pull depuis ghcr.io)
+            docker compose -f docker-compose.prod.yml pull
+
+            # Redémarrer les conteneurs mis à jour sans couper les autres
+            docker compose -f docker-compose.prod.yml up -d --remove-orphans
+
+            # Nettoyer les anciennes images inutilisées
+            docker image prune -f
+
+            # Vérification santé
+            sleep 15
+            curl -fs http://localhost:5000/health && echo "✅ API OK" || echo "⚠️ API health check failed"
+            curl -fs http://localhost:8000/health && echo "✅ AI OK" || echo "⚠️ AI health check failed"

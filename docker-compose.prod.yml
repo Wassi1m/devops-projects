@@ -25,9 +25,7 @@ services:
 
   # ==================== API ====================
   api:
-    build:
-      context: ./projet/BourseIA
-      dockerfile: Dockerfile
+    image: ${API_IMAGE:-ghcr.io/wassi1m/devops-projects/bourseia-api:main}
     container_name: bourseia-api
     restart: always
     ports:
@@ -48,9 +46,7 @@ services:
 
   # ==================== AI ====================
   coin-ai:
-    build:
-      context: ./coin_ai
-      dockerfile: Dockerfile
+    image: ${AI_IMAGE:-ghcr.io/wassi1m/devops-projects/coin-ai:main}
     container_name: coin_ai_app
     restart: always
     ports:
@@ -60,7 +56,6 @@ services:
       OTEL_EXPORTER_OTLP_ENDPOINT: "http://otel-collector:4317"
       OTEL_SERVICE_NAME: "coin-ai"
     volumes:
-      - ./coin_ai:/app
       - ./coin_ai/data_set:/app/data_set:ro
       - ./coin_ai/models:/app/models:ro
     networks:
