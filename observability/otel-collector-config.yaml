@@ -43,7 +43,7 @@ processors:
         value: "1.0.0"
         action: insert
 
-  resource_detection:
+  resourcedetection:
     detectors: ['docker', 'system', 'env']
     override: true
 
@@ -62,15 +62,15 @@ exporters:
       tls:
         insecure: true
 
-  logging:
+  debug:
     loglevel: debug
 
 service:
   pipelines:
     traces:
       receivers: [otlp, jaeger, zipkin]
-      processors: [memory_limiter, batch, attributes, resource_detection]
-      exporters: [jaeger, logging]
+      processors: [memory_limiter, batch, attributes, resourcedetection]
+      exporters: [jaeger, debug]
 
     metrics:
       receivers: [otlp, prometheus]
@@ -80,7 +80,7 @@ service:
     logs:
       receivers: [otlp]
       processors: [memory_limiter, batch, attributes]
-      exporters: [logging]
+      exporters: [debug]
 
   telemetry:
     logs:
