@@ -99,7 +99,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Trivy config scan (Kubernetes)
-        uses: aquasecurity/trivy-action@0.24.0
+        uses: aquasecurity/trivy-action@master
         with:
           scan-type: 'config'
           scan-ref: 'k8s/'
@@ -108,7 +108,7 @@ jobs:
           exit-code: '0'
 
       - name: Trivy config scan (Docker Compose)
-        uses: aquasecurity/trivy-action@0.24.0
+        uses: aquasecurity/trivy-action@master
         with:
           scan-type: 'config'
           scan-ref: 'docker-compose.prod.yml'
@@ -117,7 +117,7 @@ jobs:
           exit-code: '0'
 
       - name: Trivy config scan (Helm)
-        uses: aquasecurity/trivy-action@0.24.0
+        uses: aquasecurity/trivy-action@master
         with:
           scan-type: 'config'
           scan-ref: 'helm/'
