@@ -1,0 +1,10 @@
+# 1. Générer les images de graphiques used in modèle 
+python generate_charts.py
+
+# 2. Entraîner le modèle CNN (peut prendre 10-30 min en CPU)
+python train.py
+
+# 3. Relancer l'API
+python main.py
+
+http://localhost:8001/docs#/

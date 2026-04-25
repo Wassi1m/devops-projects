@@ -1,0 +1,21 @@
+version: "3.9"
+
+services:
+  coin_ai:
+    build: .
+    container_name: coin_ai_app
+
+    ports:
+      - "8000:8000"
+
+    volumes:
+      # 🔥 code live (modifications sans rebuild)
+      - .:/app
+
+      # ⚠️ dataset séparé (important)
+      - ./data_set:/app/data_set
+
+    environment:
+      - PYTHONUNBUFFERED=1
+
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload

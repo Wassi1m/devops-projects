@@ -1,0 +1,20 @@
+# .NET
+bin/
+obj/
+
+# Python
+venv/
+__pycache__/
+*.pyc
+
+# data
+data_set/
+*.csv
+
+# images
+*.png
+*.jpg
+
+# docker
+.env
+*.log

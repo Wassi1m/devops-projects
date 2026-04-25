@@ -1,0 +1,16 @@
+fastapi==0.129.0
+uvicorn==0.41.0
+
+# ✅ version CPU uniquement (beaucoup plus rapide)
+torch==2.2.2+cpu
+torchvision==0.17.2+cpu
+--extra-index-url https://download.pytorch.org/whl/cpu
+
+Pillow>=10.0.0
+matplotlib>=3.7.0
+mplfinance>=0.12.10b0
+pandas>=2.0.0
+numpy==1.26.4
+scikit-learn>=1.3.0
+python-multipart>=0.0.6
+tqdm>=4.65.0

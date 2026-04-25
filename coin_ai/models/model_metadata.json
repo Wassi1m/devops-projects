@@ -1,0 +1,23 @@
+{
+  "architecture": "efficientnet_b0",
+  "num_classes": 2,
+  "class_names": [
+    "DOWN",
+    "UP"
+  ],
+  "best_val_acc": 0.5437762749040395,
+  "chart_window": 40,
+  "prediction_horizon": 10,
+  "image_size": [
+    224,
+    224
+  ],
+  "total_images": 27355,
+  "train_size": 21884,
+  "val_size": 5471,
+  "epochs_trained": 29,
+  "learning_rate": 0.0003,
+  "batch_size": 32,
+  "label_smoothing": 0.05,
+  "min_price_change": 0.02
+}
