@@ -131,7 +131,7 @@ async function loadDashboard() {
   const user = getUser();
   if (user) {
     document.getElementById('dashTitle').textContent = `Bonjour, ${user.prenom} 👋`;
-    document.getElementById('dashWelcome').textContent = `${user.profilInvestisseur} · Tableau de bord personnel`;
+    document.getElementById('dashWelcome').textContent = `${user.profilInvestisseur} · Tableajfnjnu de bord personnel`;
   }
   try {
     const stats = await AuthApi.getDashboard();
