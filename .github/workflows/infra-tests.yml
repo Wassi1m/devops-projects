@@ -1,0 +1,84 @@
+name: Infrastructure Tests
+
+on:
+  pull_request:
+    paths:
+      - 'k8s/**'
+      - 'helm/**'
+      - 'docker-compose.prod.yml'
+      - '.github/workflows/infra-tests.yml'
+
+jobs:
+  validate-k8s:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Install kubeconform
+      run: |
+        wget https://github.com/yannh/kubeconform/releases/latest/download/kubeconform-linux-amd64.tar.gz
+        tar xf kubeconform-linux-amd64.tar.gz
+        sudo mv kubeconform /usr/local/bin
+
+    - name: Validate Kubernetes manifests
+      run: |
+        find k8s -name '*.yaml' -type f | xargs kubeconform -strict
+
+  validate-helm:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Helm
+      uses: azure/setup-helm@v3
+
+    - name: Lint Helm charts
+      run: |
+        helm lint helm/coin-system
+        helm template coin-system helm/coin-system --values helm/coin-system/values.yaml
+
+    - name: Check Helm chart documentation
+      run: |
+        helm inspect values helm/coin-system > /tmp/values.txt
+        cat /tmp/values.txt
+
+  security-policies:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Install Kyverno CLI
+      run: |
+        kubectl config view --raw > kubeconfig.yaml
+        brew install kyverno
+
+    - name: Validate security policies
+      run: |
+        kyverno apply k8s/policies/ --resource k8s/base/ -v 6
+
+  docker-compose-validation:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Validate Docker Compose syntax
+      run: |
+        docker-compose -f docker-compose.prod.yml config
+
+    - name: Check image availability
+      run: |
+        docker-compose -f docker-compose.prod.yml pull --dry-run
+
+  cost-analysis:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Install Infracost
+      run: |
+        curl -L https://github.com/infracost/infracost/releases/latest/download/infracost-linux-x86_64.tar.gz | tar xz
+
+    - name: Run cost analysis
+      run: |
+        ./infracost breakdown --path helm/coin-system/values.yaml
+

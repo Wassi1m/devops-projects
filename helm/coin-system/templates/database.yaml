@@ -1,0 +1,82 @@
+{{- if .Values.database.enabled }}
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "coin-system.fullname" . }}-postgres
+  namespace: {{ .Values.namespace.name }}
+spec:
+  serviceName: postgres
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "coin-system.labels" . | nindent 6 }}
+      app: postgres
+  template:
+    metadata:
+      labels:
+        {{- include "coin-system.labels" . | nindent 8 }}
+        app: postgres
+    spec:
+      containers:
+      - name: postgres
+        image: "postgres:16-alpine"
+        ports:
+        - containerPort: {{ .Values.database.port }}
+        env:
+        - name: POSTGRES_USER
+          value: {{ .Values.database.credentials.username }}
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "coin-system.fullname" . }}-db-secret
+              key: password
+        - name: POSTGRES_DB
+          value: {{ .Values.database.credentials.database }}
+        resources:
+          {{- toYaml .Values.database.resources | nindent 12 }}
+        livenessProbe:
+          exec:
+            command:
+            - /bin/sh
+            - -c
+            - pg_isready -U {{ .Values.database.credentials.username }}
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          exec:
+            command:
+            - /bin/sh
+            - -c
+            - pg_isready -U {{ .Values.database.credentials.username }}
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        volumeMounts:
+        - name: postgres-storage
+          mountPath: /var/lib/postgresql/data
+  volumeClaimTemplates:
+  - metadata:
+      name: postgres-storage
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      storageClassName: {{ .Values.database.persistence.storageClass }}
+      resources:
+        requests:
+          storage: {{ .Values.database.persistence.size }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres
+  namespace: {{ .Values.namespace.name }}
+  labels:
+    {{- include "coin-system.labels" . | nindent 4 }}
+spec:
+  selector:
+    {{- include "coin-system.labels" . | nindent 4 }}
+    app: postgres
+  ports:
+  - port: {{ .Values.database.port }}
+    targetPort: {{ .Values.database.port }}
+  clusterIP: None
+{{- end }}
+

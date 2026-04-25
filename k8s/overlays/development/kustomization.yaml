@@ -1,0 +1,44 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+bases:
+  - ../base
+
+namePrefix: dev-
+
+commonLabels:
+  environment: development
+  tier: dev
+
+replicas:
+  - name: api
+    count: 1
+  - name: coin-ai
+    count: 1
+
+patchesJson6902:
+  - target:
+      group: apps
+      version: v1
+      kind: Deployment
+      name: api
+    patch: |-
+      - op: replace
+        path: /spec/replicas
+        value: 1
+  - target:
+      group: apps
+      version: v1
+      kind: Deployment
+      name: coin-ai
+    patch: |-
+      - op: replace
+        path: /spec/replicas
+        value: 1
+
+configMapGenerator:
+  - name: app-config
+    files:
+      - env=dev.env
+    behavior: merge
+

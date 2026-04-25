@@ -1,0 +1,162 @@
+groups:
+  - name: Application
+    interval: 30s
+    rules:
+      # API Service Alerts
+      - alert: APIServiceDown
+        expr: up{job="bourseia-api"} == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "BourseIA API is down"
+          description: "BourseIA API has been unreachable for more than 2 minutes"
+
+      - alert: APIHighErrorRate
+        expr: |
+          (
+            sum(rate(http_requests_total{job="bourseia-api",status=~"5.."}[5m]))
+            /
+            sum(rate(http_requests_total{job="bourseia-api"}[5m]))
+          ) > 0.05
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High error rate in API"
+          description: "API error rate is above 5% ({{ $value | humanizePercentage }})"
+
+      - alert: APIResponseTimeHigh
+        expr: |
+          histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job="bourseia-api"}[5m])) > 1
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "API response time is high"
+          description: "95th percentile response time is above 1s ({{ $value }}s)"
+
+      # AI Service Alerts
+      - alert: CoinAIServiceDown
+        expr: up{job="coin-ai"} == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Coin AI service is down"
+          description: "Coin AI has been unreachable for more than 2 minutes"
+
+      - alert: AIModelPredictionLatency
+        expr: |
+          histogram_quantile(0.95, rate(prediction_latency_seconds_bucket[5m])) > 5
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "AI model prediction latency is high"
+          description: "Prediction latency is above 5 seconds"
+
+  - name: Infrastructure
+    interval: 30s
+    rules:
+      # Database Alerts
+      - alert: PostgreSQLDown
+        expr: up{job="postgres"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "PostgreSQL is down"
+          description: "PostgreSQL database is not responding"
+
+      - alert: PostgreSQLHighConnections
+        expr: pg_stat_activity_count > 90
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "PostgreSQL has high connection count"
+          description: "Connection count: {{ $value }}"
+
+      - alert: PostgreSQLSlowQueries
+        expr: rate(pg_stat_statements_calls_total[5m]) > 1000
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "PostgreSQL high query rate"
+          description: "Query rate: {{ $value }} queries/sec"
+
+      # System Alerts
+      - alert: HighCPUUsage
+        expr: (100 - (avg by (instance) (rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100)) > 80
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High CPU usage on {{ $labels.instance }}"
+          description: "CPU usage is {{ $value }}%"
+
+      - alert: HighMemoryUsage
+        expr: (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100 > 85
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High memory usage on {{ $labels.instance }}"
+          description: "Memory usage is {{ $value }}%"
+
+      - alert: HighDiskUsage
+        expr: (1 - (node_filesystem_avail_bytes / node_filesystem_size_bytes)) * 100 > 85
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High disk usage on {{ $labels.instance }}"
+          description: "Disk usage is {{ $value }}%"
+
+      - alert: DiskSpaceRunningOut
+        expr: predict_linear(node_filesystem_avail_bytes[6h], 24*3600) < 0
+        for: 15m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Disk space will run out soon"
+          description: "Disk space is predicted to run out within 24 hours"
+
+  - name: Observability
+    interval: 30s
+    rules:
+      - alert: PrometheusDown
+        expr: up{job="prometheus"} == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Prometheus is down"
+
+      - alert: AlertmanagerDown
+        expr: up{job="alertmanager"} == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Alertmanager is down"
+
+      - alert: LokiDown
+        expr: up{job="loki"} == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Loki is down"
+
+      - alert: PrometheusHighMemoryUsage
+        expr: process_resident_memory_bytes{job="prometheus"} / 1024 / 1024 > 1024
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Prometheus memory usage is high"
+          description: "Prometheus is using {{ $value }}MB"
+

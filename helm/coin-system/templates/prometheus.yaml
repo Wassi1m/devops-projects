@@ -1,0 +1,80 @@
+{{- if .Values.observability.prometheus.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "coin-system.fullname" . }}-prometheus
+  namespace: {{ .Values.namespace.name }}
+  labels:
+    {{- include "coin-system.labels" . | nindent 4 }}
+    app: prometheus
+spec:
+  replicas: {{ .Values.observability.prometheus.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "coin-system.selectorLabels" . | nindent 6 }}
+      app: prometheus
+  template:
+    metadata:
+      labels:
+        {{- include "coin-system.selectorLabels" . | nindent 8 }}
+        app: prometheus
+    spec:
+      serviceAccountName: {{ include "coin-system.fullname" . }}-prometheus
+      containers:
+      - name: prometheus
+        image: "{{ .Values.observability.prometheus.image.repository }}:{{ .Values.observability.prometheus.image.tag }}"
+        args:
+          - '--config.file=/etc/prometheus/prometheus.yml'
+          - '--storage.tsdb.path=/prometheus'
+          - '--storage.tsdb.retention.time={{ .Values.observability.prometheus.retention }}'
+          - '--web.enable-lifecycle'
+        ports:
+        - name: http
+          containerPort: 9090
+        resources:
+          {{- toYaml .Values.observability.prometheus.resources | nindent 12 }}
+        volumeMounts:
+        - name: prometheus-config
+          mountPath: /etc/prometheus
+        - name: prometheus-storage
+          mountPath: /prometheus
+      volumes:
+      - name: prometheus-config
+        configMap:
+          name: {{ include "coin-system.fullname" . }}-prometheus-config
+      - name: prometheus-storage
+        persistentVolumeClaim:
+          claimName: {{ include "coin-system.fullname" . }}-prometheus-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "coin-system.fullname" . }}-prometheus
+  namespace: {{ .Values.namespace.name }}
+  labels:
+    {{- include "coin-system.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.observability.prometheus.service.type }}
+  selector:
+    {{- include "coin-system.selectorLabels" . | nindent 4 }}
+    app: prometheus
+  ports:
+  - port: {{ .Values.observability.prometheus.service.port }}
+    targetPort: http
+    name: http
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "coin-system.fullname" . }}-prometheus-pvc
+  namespace: {{ .Values.namespace.name }}
+  labels:
+    {{- include "coin-system.labels" . | nindent 4 }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: {{ .Values.observability.prometheus.persistence.storageClass }}
+  resources:
+    requests:
+      storage: {{ .Values.observability.prometheus.persistence.size }}
+{{- end }}

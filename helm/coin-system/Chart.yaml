@@ -1,0 +1,17 @@
+apiVersion: v2
+name: coin-system
+description: Helm chart for Coin trading system with monitoring
+type: application
+version: 1.0.0
+appVersion: "1.0.0"
+keywords:
+  - trading
+  - monitoring
+  - kubernetes
+maintainers:
+  - name: Your Team
+    email: team@example.com
+home: https://example.com
+sources:
+  - https://github.com/yourrepo/coin-system
+
