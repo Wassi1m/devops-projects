@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>BourseIA</title>
+  <link rel="stylesheet" href="/css/style.css"/>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+
+<!-- ═══ NAVBAR ═══════════════════════════════════════════════════════════════ -->
+<nav id="navbar">
+  <div class="nav-brand" onclick="goHome()">
+    <span class="logo-icon">📈</span>
+    <span class="logo-text">BourseIA</span>
+  </div>
+
+  <ul class="nav-links" id="navLinks">
+    <li><a href="#" onclick="showPage('dashboard')" class="nav-item auth-only hidden">🏠 Dashboard</a></li>
+    <li><a href="#" onclick="showPage('upload')" class="nav-item auth-only hidden">📊 Analyse</a></li>
+    <li><a href="#" onclick="showPage('ideas')" class="nav-item auth-only hidden">💡 Idées</a></li>
+    <li><a href="#" onclick="showPage('teams')" class="nav-item auth-only hidden">👥 Équipes</a></li>
+    <li><a href="#" onclick="showPage('chat')" class="nav-item auth-only hidden">💬 Chat</a></li>
+  </ul>
+
+  <div class="nav-right">
+    <!-- Cloche notifications -->
+    <div class="notif-wrapper auth-only hidden" id="notifWrapper">
+      <button class="icon-btn" onclick="toggleNotifPanel()" id="notifBtn">
+        🔔 <span class="notif-badge hidden" id="notifBadge">0</span>
+      </button>
+      <div class="notif-panel hidden" id="notifPanel">
+        <div class="notif-header">
+          <span>Notifications</span>
+          <button onclick="marquerToutesLues()" class="link-btn">Tout marquer lu</button>
+        </div>
+        <div id="notifList" class="notif-list"></div>
+      </div>
+    </div>
+
+    <!-- Avatar utilisateur -->
+    <div class="user-menu auth-only hidden" id="userMenu">
+      <button class="avatar-btn" onclick="toggleUserMenu()">
+        <div class="avatar" id="navAvatar">?</div>
+        <span id="navUserName"></span>
+        <span class="chevron">▾</span>
+      </button>
+      <div class="user-dropdown hidden" id="userDropdown">
+        <a href="#" onclick="showPage('profile')" class="dropdown-item">👤 Mon profil</a>
+        <a href="#" onclick="showPage('dashboard')" class="dropdown-item">🏠 Tableau de bord</a>
+        <div class="dropdown-divider"></div>
+        <a href="#" onclick="logout()" class="dropdown-item danger">🚪 Déconnexion</a>
+      </div>
+    </div>
+
+    <button onclick="showPage('auth')" id="btnLogin" class="btn btn-primary">Connexion</button>
+  </div>
+</nav>
+
+<!-- ═══ PAGE ACCUEIL ═════════════════════════════════════════════════════════ -->
+<div id="page-home" class="page active">
+  <div class="hero">
+    <div class="hero-content">
+      <div class="hero-badge">✨ Propulsé par Intelligence Artificielle</div>
+      <h1>Analysez vos courbes<br/><span class="gradient-text">avec l'IA</span></h1>
+      <p class="hero-sub">Uploadez vos graphiques boursiers, obtenez des analyses automatiques, partagez vos idées avec votre équipe en temps réel.</p>
+      <div class="hero-actions">
+        <button onclick="showPage('auth')" class="btn btn-primary btn-lg">🚀 Commencer gratuitement</button>
+        <button onclick="switchAuthTab('login'); showPage('auth')" class="btn btn-glass btn-lg">Se connecter</button>
+      </div>
+      <div class="hero-stats">
+        <div class="hero-stat"><span class="hero-stat-num">100%</span><span class="hero-stat-label">IA locale</span></div>
+        <div class="hero-stat-div"></div>
+        <div class="hero-stat"><span class="hero-stat-num">JWT</span><span class="hero-stat-label">Sécurisé</span></div>
+        <div class="hero-stat-div"></div>
+        <div class="hero-stat"><span class="hero-stat-num">Live</span><span class="hero-stat-label">Chat SignalR</span></div>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <div class="floating-card card-main">
+        <div class="card-chip">IA ANALYSE</div>
+        <div class="card-ticker">AAPL <span class="tick-up">+2.4%</span></div>
+        <svg viewBox="0 0 280 100" class="hero-chart">
+          <defs>
+            <linearGradient id="hg" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#6366f1" stop-opacity="0.5"/>
+              <stop offset="100%" stop-color="#6366f1" stop-opacity="0"/>
+            </linearGradient>
+          </defs>
+          <path d="M0,80 C20,75 40,82 60,65 S90,45 110,38 S150,22 170,18 S210,12 230,8 S260,5 280,3 L280,100 L0,100Z" fill="url(#hg)"/>
+          <path d="M0,80 C20,75 40,82 60,65 S90,45 110,38 S150,22 170,18 S210,12 230,8 S260,5 280,3" fill="none" stroke="#6366f1" stroke-width="2.5" stroke-linecap="round"/>
+        </svg>
+        <div class="card-stats">
+          <div><span class="cs-l">Min</span><span class="cs-v">142.3</span></div>
+          <div><span class="cs-l">Moy</span><span class="cs-v">166.1</span></div>
+          <div><span class="cs-l">Max</span><span class="cs-v">189.9</span></div>
+        </div>
+      </div>
+      <div class="floating-card card-mini card-mini-1">
+        <span>📈</span> Hausse détectée
+      </div>
+      <div class="floating-card card-mini card-mini-2">
+        <span>🤖</span> IA prête
+      </div>
+    </div>
+  </div>
+
+  <div class="features-section">
+    <div class="section-label">FONCTIONNALITÉS</div>
+    <h2 class="section-title">Tout pour investir intelligemment</h2>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon-wrap"><span>🤖</span></div>
+        <h3>Analyse IA</h3>
+        <p>Détection automatique des tendances, support/résistance et points clés de vos graphiques.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon-wrap"><span>👥</span></div>
+        <h3>Équipes</h3>
+        <p>Formez des équipes d'investisseurs, invitez des membres et collaborez sur des analyses.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon-wrap"><span>💬</span></div>
+        <h3>Chat en direct</h3>
+        <p>Messagerie privée et chat d'équipe en temps réel via WebSocket SignalR.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon-wrap"><span>💡</span></div>
+        <h3>Idées d'investissement</h3>
+        <p>Partagez et découvrez des idées d'investissement de la communauté.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon-wrap"><span>🔔</span></div>
+        <h3>Alertes</h3>
+        <p>Notifications automatiques sur les mouvements de marché et activités importantes.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon-wrap"><span>🔒</span></div>
+        <h3>Sécurité JWT</h3>
+        <p>Authentification sécurisée par tokens JWT avec expiration automatique.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ PAGE AUTH ════════════════════════════════════════════════════════════ -->
+<div id="page-auth" class="page">
+  <div class="auth-container">
+    <div class="auth-card">
+      <div class="auth-logo">📈 BourseIA</div>
+      <div class="auth-tabs">
+        <button class="auth-tab active" onclick="switchAuthTab('login')" id="tab-login">Connexion</button>
+        <button class="auth-tab" onclick="switchAuthTab('register')" id="tab-register">Inscription</button>
+      </div>
+
+      <div id="form-login">
+        <h2>Bon retour 👋</h2>
+        <p class="form-sub">Connectez-vous à votre compte</p>
+        <div id="loginError" class="alert alert-error hidden"></div>
+        <div class="form-group">
+          <label>Email</label>
+          <div class="input-wrap"><span class="input-icon">✉️</span><input type="email" id="loginEmail" placeholder="jean@gmail.com"/></div>
+        </div>
+        <div class="form-group">
+          <label>Mot de passe</label>
+          <div class="input-wrap"><span class="input-icon">🔑</span><input type="password" id="loginPassword" placeholder="••••••••" onkeydown="if(event.key==='Enter')login()"/></div>
+        </div>
+        <button class="btn btn-primary btn-full" onclick="login()" id="loginBtn">
+          <span id="loginSpinner" class="spinner hidden"></span> Se connecter
+        </button>
+        <p class="auth-switch">Pas de compte ? <a href="#" onclick="switchAuthTab('register')">S'inscrire gratuitement</a></p>
+      </div>
+
+      <div id="form-register" class="hidden">
+        <h2>Créer un compte 🚀</h2>
+        <p class="form-sub">Rejoignez BourseIA</p>
+        <div id="registerError" class="alert alert-error hidden"></div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Prénom</label>
+            <input type="text" id="regPrenom" placeholder="Jean"/>
+          </div>
+          <div class="form-group">
+            <label>Nom</label>
+            <input type="text" id="regNom" placeholder="Dupont"/>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Email</label>
+          <div class="input-wrap"><span class="input-icon">✉️</span><input type="email" id="regEmail" placeholder="jean@gmail.com"/></div>
+        </div>
+        <div class="form-group">
+          <label>Mot de passe <small>(min. 6 caractères)</small></label>
+          <div class="input-wrap"><span class="input-icon">🔑</span><input type="password" id="regPassword" placeholder="••••••••"/></div>
+        </div>
+        <div class="form-group">
+          <label>Profil investisseur</label>
+          <select id="regProfil">
+            <option value="Débutant">🌱 Débutant</option>
+            <option value="Intermédiaire">📈 Intermédiaire</option>
+            <option value="Expérimenté">🎯 Expérimenté</option>
+            <option value="Expert">🏆 Expert</option>
+          </select>
+        </div>
+        <button class="btn btn-primary btn-full" onclick="register()" id="registerBtn">
+          <span id="registerSpinner" class="spinner hidden"></span> Créer mon compte
+        </button>
+        <p class="auth-switch">Déjà un compte ? <a href="#" onclick="switchAuthTab('login')">Se connecter</a></p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ PAGE DASHBOARD ═══════════════════════════════════════════════════════ -->
+<div id="page-dashboard" class="page">
+  <div class="page-header">
+    <div>
+      <h1 id="dashTitle">Tableau de bord</h1>
+      <p id="dashWelcome" class="page-sub"></p>
+    </div>
+    <button onclick="showPage('upload')" class="btn btn-primary">+ Nouvelle analyse</button>
+  </div>
+
+  <div class="stats-grid">
+    <div class="stat-card stat-total"><div class="stat-icon">📊</div><div><span class="stat-number" id="statTotal">—</span><span class="stat-desc">Analyses totales</span></div></div>
+    <div class="stat-card stat-up"><div class="stat-icon">📈</div><div><span class="stat-number" id="statHausse">—</span><span class="stat-desc">En hausse</span></div></div>
+    <div class="stat-card stat-down"><div class="stat-icon">📉</div><div><span class="stat-number" id="statBaisse">—</span><span class="stat-desc">En baisse</span></div></div>
+    <div class="stat-card stat-stable"><div class="stat-icon">➡️</div><div><span class="stat-number" id="statStable">—</span><span class="stat-desc">Stables</span></div></div>
+  </div>
+
+  <div class="dash-grid">
+    <div class="section-card">
+      <div class="card-header-row">
+        <h3>📊 Répartition des tendances</h3>
+      </div>
+      <div class="chart-container">
+        <canvas id="tendanceChart"></canvas>
+        <div id="chartEmpty" class="chart-empty hidden">Pas encore de données</div>
+      </div>
+    </div>
+    <div class="section-card">
+      <div class="card-header-row">
+        <h3>⏱ Dernières analyses</h3>
+        <a href="#" onclick="showPage('upload')" class="link-btn">Voir tout →</a>
+      </div>
+      <div id="lastAnalyses" class="analyses-list">
+        <div class="empty-state">Aucune analyse. <a href="#" onclick="showPage('upload')">Uploader →</a></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Invitations en attente -->
+  <div class="section-card" id="invitationsCard" style="display:none">
+    <div class="card-header-row">
+      <h3>📬 Invitations en attente</h3>
+      <span id="invitCount" class="badge badge-admin"></span>
+    </div>
+    <div id="invitationsList"></div>
+  </div>
+</div>
+
+<!-- ═══ PAGE UPLOAD / ANALYSE ════════════════════════════════════════════════ -->
+<div id="page-upload" class="page">
+  <div class="page-header">
+    <div><h1>📊 Upload & Analyse IA</h1><p class="page-sub">Téléchargez une courbe boursière pour analyse automatique</p></div>
+  </div>
+  <div class="upload-layout">
+    <div class="section-card upload-box">
+      <h3>Nouvelle courbe</h3>
+      <div class="dropzone" id="dropzone" onclick="document.getElementById('fileInput').click()">
+        <div id="dropzoneContent">
+          <div class="dz-icon">📁</div>
+          <p>Glissez une image ici ou <strong>cliquez</strong></p>
+          <small>PNG, JPG — max 10 Mo</small>
+        </div>
+        <div id="previewWrap" class="hidden">
+          <img id="previewImg" src="" alt="aperçu" class="preview-img"/>
+          <p id="fileName" class="file-name"></p>
+          <button class="btn btn-outline" style="font-size:0.8rem;padding:4px 10px" onclick="event.stopPropagation();resetFile()">✕ Changer</button>
+        </div>
+        <input type="file" id="fileInput" accept=".png,.jpg,.jpeg" style="display:none" onchange="handleFile(this)"/>
+      </div>
+      <div class="form-group">
+        <label>Nom de l'action (optionnel)</label>
+        <div class="input-wrap"><span class="input-icon">🏷️</span><input type="text" id="typeAction" placeholder="ex: AAPL, BNP, TOTAL..."/></div>
+      </div>
+      <div id="uploadProgress" class="progress-wrap hidden">
+        <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+        <span id="progressLabel">Upload en cours...</span>
+      </div>
+      <div id="uploadError" class="alert alert-error hidden"></div>
+      <div id="uploadSuccess" class="alert alert-success hidden"></div>
+      <button class="btn btn-primary btn-full" onclick="uploadCourbe()" id="btnUpload" disabled>
+        <span id="uploadSpinner" class="spinner hidden"></span> 🤖 Uploader et analyser
+      </button>
+    </div>
+
+    <div class="section-card courbes-box">
+      <div class="card-header-row">
+        <h3>📁 Mes courbes</h3>
+        <span id="courbesCount" class="badge badge-stable"></span>
+      </div>
+      <div id="courbesList"><div class="empty-state">Aucune courbe uploadée.</div></div>
+    </div>
+  </div>
+
+  <div id="analyseResult" class="section-card hidden" style="margin:0 2rem 1.5rem">
+    <div class="card-header-row">
+      <h3>🤖 Résultat de l'analyse IA</h3>
+      <span id="analyseStatut" class="badge"></span>
+    </div>
+    <div class="analyse-content" id="analyseContent"></div>
+  </div>
+</div>
+
+<!-- ═══ PAGE IDÉES ════════════════════════════════════════════════════════════ -->
+<div id="page-ideas" class="page">
+  <div class="page-header">
+    <div><h1>💡 Idées d'investissement</h1><p class="page-sub">Partagez et découvrez des idées de la communauté</p></div>
+    <button onclick="toggleSection('createIdeaForm')" class="btn btn-primary">+ Nouvelle idée</button>
+  </div>
+
+  <div id="createIdeaForm" class="section-card collapsible hidden">
+    <h3>✍️ Créer une idée</h3>
+    <div class="form-group"><label>Titre</label><input type="text" id="ideaTitre" placeholder="Ex: Achat AAPL — tendance haussière"/></div>
+    <div class="form-group"><label>Description</label><textarea id="ideaDesc" rows="3" placeholder="Détaillez votre analyse..."></textarea></div>
+    <div class="form-row">
+      <div class="form-group"><label>Action concernée</label><input type="text" id="ideaAction" placeholder="AAPL"/></div>
+      <div class="form-group"><label>Tendance prévue</label>
+        <select id="ideaTendance">
+          <option value="Hausse">📈 Hausse</option>
+          <option value="Baisse">📉 Baisse</option>
+          <option value="Neutre" selected>➡️ Neutre</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Rentabilité estimée (%)</label><input type="number" id="ideaRentabilite" placeholder="ex: 12.5"/></div>
+    </div>
+    <div class="form-group checkbox-group">
+      <label><input type="checkbox" id="ideaPublique"/> 🌐 Rendre publique (visible par tous)</label>
+    </div>
+    <div id="ideaError" class="alert alert-error hidden"></div>
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="createIdea()">✅ Publier l'idée</button>
+      <button class="btn btn-outline" onclick="toggleSection('createIdeaForm')">Annuler</button>
+    </div>
+  </div>
+
+  <div class="ideas-filter">
+    <div class="filter-tabs">
+      <button class="filter-tab active" onclick="filterIdeas('mes', this)">Mes idées</button>
+      <button class="filter-tab" onclick="filterIdeas('publiques', this)">🌐 Publiques</button>
+    </div>
+    <div class="filter-search">
+      <input type="text" id="ideaSearch" placeholder="🔍 Rechercher..." oninput="filterIdeaSearch()"/>
+    </div>
+  </div>
+
+  <div id="ideasList" class="ideas-grid"></div>
+</div>
+
+<!-- ═══ PAGE ÉQUIPES ══════════════════════════════════════════════════════════ -->
+<div id="page-teams" class="page">
+  <div class="page-header">
+    <div><h1>👥 Mes Équipes</h1><p class="page-sub">Collaborez avec vos partenaires d'investissement</p></div>
+    <button onclick="toggleSection('createTeamForm')" class="btn btn-primary">+ Créer une équipe</button>
+  </div>
+
+  <div id="createTeamForm" class="section-card collapsible hidden">
+    <h3>🆕 Nouvelle équipe</h3>
+    <div class="form-group"><label>Nom de l'équipe</label><input type="text" id="teamNom" placeholder="Ex: Les Bulls 🐂"/></div>
+    <div class="form-group"><label>Description</label><textarea id="teamDesc" rows="2" placeholder="Stratégie de l'équipe..."></textarea></div>
+    <div id="teamError" class="alert alert-error hidden"></div>
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="createTeam()">✅ Créer l'équipe</button>
+      <button class="btn btn-outline" onclick="toggleSection('createTeamForm')">Annuler</button>
+    </div>
+  </div>
+
+  <div id="teamsList" class="teams-grid"></div>
+</div>
+
+<!-- ═══ PAGE DÉTAIL ÉQUIPE ════════════════════════════════════════════════════ -->
+<div id="page-team-detail" class="page">
+  <div class="page-header">
+    <div>
+      <button onclick="showPage('teams')" class="btn btn-outline btn-sm back-btn">← Retour</button>
+      <h1 id="tdNom">Équipe</h1>
+      <p class="page-sub" id="tdDesc"></p>
+    </div>
+    <div class="team-detail-meta">
+      <span class="badge badge-admin" id="tdMonRole"></span>
+      <span id="tdNbMembres" class="badge badge-info"></span>
+    </div>
+  </div>
+
+  <!-- Onglets -->
+  <div class="td-tabs">
+    <button class="td-tab active" onclick="switchTeamTab('membres', this)">👥 Membres</button>
+    <button class="td-tab" onclick="switchTeamTab('chat', this)">💬 Chat</button>
+    <button class="td-tab" onclick="switchTeamTab('analyses', this)">📊 Analyses partagées</button>
+  </div>
+
+  <!-- ── Onglet Membres ────────────────────────────────────────── -->
+  <div id="td-tab-membres" class="td-tab-content active">
+    <div class="section-card">
+      <div class="section-header">
+        <h3>👥 Membres de l'équipe</h3>
+        <button id="tdInviteBtn" onclick="toggleSection('tdInviteForm')" class="btn btn-primary btn-sm admin-only hidden">+ Inviter</button>
+      </div>
+      <div id="tdInviteForm" class="invite-inline collapsible hidden">
+        <div class="form-row">
+          <div class="form-group flex-1"><input type="text" id="tdInviteEmail" placeholder="Email du membre à inviter"/></div>
+          <button class="btn btn-primary" onclick="tdInviterMembre()">Envoyer l'invitation</button>
+          <button class="btn btn-outline" onclick="toggleSection('tdInviteForm')">Annuler</button>
+        </div>
+        <div id="tdInviteError" class="alert alert-error hidden"></div>
+      </div>
+      <div id="tdMembresList" class="membres-list"></div>
+    </div>
+
+    <div class="section-card admin-only hidden" id="tdBanSection">
+      <h3>🚫 Membres bannis</h3>
+      <div id="tdBannisList" class="membres-list"></div>
+    </div>
+  </div>
+
+  <!-- ── Onglet Chat ───────────────────────────────────────────── -->
+  <div id="td-tab-chat" class="td-tab-content hidden">
+    <div class="team-chat-container">
+      <div class="chat-messages" id="tdChatMessages"></div>
+      <div class="chat-input-bar">
+        <input type="text" id="tdChatInput" placeholder="Écrire un message à l'équipe..." onkeydown="if(event.key==='Enter')tdSendMessage()"/>
+        <button class="btn btn-primary" onclick="tdSendMessage()">Envoyer ✈️</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Onglet Analyses ──────────────────────────────────────── -->
+  <div id="td-tab-analyses" class="td-tab-content hidden">
+    <div class="section-card">
+      <div class="section-header">
+        <h3>📊 Courbes partagées dans l'équipe</h3>
+        <button onclick="toggleSection('tdShareForm')" class="btn btn-primary btn-sm">+ Partager une courbe</button>
+      </div>
+      <div id="tdShareForm" class="section-card collapsible hidden" style="margin:0 0 1rem 0">
+        <h4>Partager une de vos courbes</h4>
+        <div class="form-row">
+          <div class="form-group flex-1">
+            <label>Sélectionner une courbe</label>
+            <select id="tdCourbeSelect"></select>
+          </div>
+          <div class="form-group flex-2">
+            <label>Commentaire (optionnel)</label>
+            <input type="text" id="tdShareComment" placeholder="Ex: Tendance très intéressante..."/>
+          </div>
+        </div>
+        <div id="tdShareError" class="alert alert-error hidden"></div>
+        <div class="btn-row">
+          <button class="btn btn-primary" onclick="tdPartagerCourbe()">📤 Partager</button>
+          <button class="btn btn-outline" onclick="toggleSection('tdShareForm')">Annuler</button>
+        </div>
+      </div>
+      <div id="tdAnalysesList" class="td-analyses-list"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ PAGE CHAT ═════════════════════════════════════════════════════════════ -->
+<div id="page-chat" class="page">
+  <div class="page-header">
+    <div><h1>💬 Messagerie</h1><p class="page-sub">Discussions privées et en équipe</p></div>
+  </div>
+  <div class="chat-layout">
+    <div class="chat-sidebar">
+      <div class="chat-sidebar-header">
+        <div class="chat-tabs">
+          <button class="chat-tab active" onclick="switchChatTab('private', this)">💬 Privé</button>
+          <button class="chat-tab" onclick="switchChatTab('teams', this)">👥 Équipes</button>
+        </div>
+      </div>
+      <div id="chatContactsList"></div>
+    </div>
+    <div class="chat-main">
+      <div id="chatWelcome" class="chat-welcome">
+        <span>💬</span>
+        <p>Sélectionnez une conversation</p>
+      </div>
+      <div id="chatWindow" class="hidden">
+        <div class="chat-header-bar" id="chatHeaderBar"></div>
+        <div class="chat-messages" id="chatMessages"></div>
+        <div class="chat-input-bar">
+          <input type="text" id="chatInput" placeholder="Écrire un message..." onkeydown="if(event.key==='Enter')sendMessage()"/>
+          <button class="btn btn-primary" onclick="sendMessage()">Envoyer ✈️</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ PAGE PROFIL ═══════════════════════════════════════════════════════════ -->
+<div id="page-profile" class="page">
+  <div class="page-header">
+    <div><h1>👤 Mon Profil</h1><p class="page-sub">Gérez vos informations personnelles</p></div>
+  </div>
+  <div class="profile-layout">
+    <div class="section-card profile-card">
+      <div class="profile-avatar-section">
+        <div class="profile-avatar-big" id="profileAvatarBig">?</div>
+        <div>
+          <div class="profile-name" id="profileName"></div>
+          <div class="profile-email" id="profileEmail"></div>
+          <span class="badge badge-admin" id="profileBadge"></span>
+        </div>
+      </div>
+      <div class="profile-stats">
+        <div class="profile-stat"><span id="ps-date"></span><small>Membre depuis</small></div>
+      </div>
+    </div>
+
+    <div class="section-card">
+      <h3>✏️ Modifier le profil</h3>
+      <div id="profileSuccess" class="alert alert-success hidden"></div>
+      <div id="profileError" class="alert alert-error hidden"></div>
+      <div class="form-row">
+        <div class="form-group"><label>Prénom</label><input type="text" id="editPrenom"/></div>
+        <div class="form-group"><label>Nom</label><input type="text" id="editNom"/></div>
+      </div>
+      <div class="form-group">
+        <label>Profil investisseur</label>
+        <select id="editProfil">
+          <option value="Débutant">🌱 Débutant</option>
+          <option value="Intermédiaire">📈 Intermédiaire</option>
+          <option value="Expérimenté">🎯 Expérimenté</option>
+          <option value="Expert">🏆 Expert</option>
+        </select>
+      </div>
+      <button class="btn btn-primary" onclick="saveProfile()">💾 Sauvegarder</button>
+    </div>
+
+    <div class="section-card" id="pendingInvitsCard" style="display:none">
+      <h3>📬 Invitations en attente</h3>
+      <div id="pendingInvitsList"></div>
+    </div>
+  </div>
+</div>
+
+<script src="/js/api.js"></script>
+<script src="/js/app.js"></script>
+</body>
+</html>

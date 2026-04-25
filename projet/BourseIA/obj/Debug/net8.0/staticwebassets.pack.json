@@ -1,0 +1,53 @@
+{
+  "Files": [
+    {
+      "Id": "/app/wwwroot/courbes/3/854675fb-8053-4ede-95b8-a8c19de7d523.png",
+      "PackagePath": "staticwebassets/courbes/3/854675fb-8053-4ede-95b8-a8c19de7d523.png"
+    },
+    {
+      "Id": "/app/wwwroot/courbes/4/2b2f8099-1827-4488-83e6-21d799609375.png",
+      "PackagePath": "staticwebassets/courbes/4/2b2f8099-1827-4488-83e6-21d799609375.png"
+    },
+    {
+      "Id": "/app/wwwroot/courbes/4/59409fbb-3633-4551-ba46-54d4223f7085.png",
+      "PackagePath": "staticwebassets/courbes/4/59409fbb-3633-4551-ba46-54d4223f7085.png"
+    },
+    {
+      "Id": "/app/wwwroot/courbes/4/9f0ee816-187c-4810-85e0-f534fd4f2f7e.png",
+      "PackagePath": "staticwebassets/courbes/4/9f0ee816-187c-4810-85e0-f534fd4f2f7e.png"
+    },
+    {
+      "Id": "/app/wwwroot/css/style.css",
+      "PackagePath": "staticwebassets/css/style.css"
+    },
+    {
+      "Id": "/app/wwwroot/index.html",
+      "PackagePath": "staticwebassets/index.html"
+    },
+    {
+      "Id": "/app/wwwroot/js/api.js",
+      "PackagePath": "staticwebassets/js/api.js"
+    },
+    {
+      "Id": "/app/wwwroot/js/app.js",
+      "PackagePath": "staticwebassets/js/app.js"
+    },
+    {
+      "Id": "obj/Debug/net8.0/staticwebassets/msbuild.BourseIA.Microsoft.AspNetCore.StaticWebAssets.props",
+      "PackagePath": "build\\Microsoft.AspNetCore.StaticWebAssets.props"
+    },
+    {
+      "Id": "obj/Debug/net8.0/staticwebassets/msbuild.build.BourseIA.props",
+      "PackagePath": "build\\BourseIA.props"
+    },
+    {
+      "Id": "obj/Debug/net8.0/staticwebassets/msbuild.buildMultiTargeting.BourseIA.props",
+      "PackagePath": "buildMultiTargeting\\BourseIA.props"
+    },
+    {
+      "Id": "obj/Debug/net8.0/staticwebassets/msbuild.buildTransitive.BourseIA.props",
+      "PackagePath": "buildTransitive\\BourseIA.props"
+    }
+  ],
+  "ElementsToRemove": []
+}

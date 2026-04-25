@@ -1,0 +1,6 @@
+@BourseIA_HostAddress = http://localhost:5276
+
+GET {{BourseIA_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

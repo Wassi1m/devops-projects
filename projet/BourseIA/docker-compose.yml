@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:16
+    container_name: bourseia-db
+    restart: always
+    environment:
+      POSTGRES_USER: bourseia
+      POSTGRES_PASSWORD: secret123
+      POSTGRES_DB: bourseia_db
+    ports:
+      - "5433:5432"
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+
+  api:
+    build: .
+    container_name: bourseia-api
+    restart: always
+    ports:
+      - "5000:8080"
+    depends_on:
+      - db
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ConnectionStrings__DefaultConnection: "Host=db;Port=5432;Database=bourseia_db;Username=bourseia;Password=secret123"
+      DetectionApi__Url: "http://host.docker.internal:8000/predict"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+volumes:
+  pg_data:
