@@ -225,7 +225,7 @@ jobs:
             set -e
 
             # Aller dans le répertoire du projet sur le serveur
-            cd ~/coin
+            cd ~/devops-projects
 
             # Récupérer la dernière version du code
             git pull origin main
