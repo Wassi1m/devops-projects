@@ -17,7 +17,7 @@ jobs:
 # 1. LINT + TEST + SONAR
 # ─────────────────────────────────────────────
   lint-and-test:
-    name: Lint, Test & SonarCloud
+    name: Lint, Test 
     runs-on: ubuntu-latest
 
     steps:
@@ -148,7 +148,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: ./projet/BourseIA
-          file: ./projet/BourseIA/Dockerfile.prod
+          file: ./projet/BourseIA/Dockerfile
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
