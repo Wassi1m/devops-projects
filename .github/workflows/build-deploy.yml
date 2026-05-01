@@ -209,7 +209,7 @@ jobs:
     name: Deploy to Server (SSH + Docker Compose)
     needs: [build-api, build-ai]
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push' && vars.DEPLOY_ENABLED == 'true'
 
     environment:
       name: production
