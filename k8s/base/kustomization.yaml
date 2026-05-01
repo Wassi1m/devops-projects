@@ -15,6 +15,7 @@ resources:
   - loki.yaml
   - observability.yaml
   - alertmanager.yaml
+  - ingress.yaml
 
 labels:
   - pairs:
