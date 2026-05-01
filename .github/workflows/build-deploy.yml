@@ -243,7 +243,12 @@ jobs:
             docker image prune -f
 
             # Vérification santé via Nginx (load balancer)
-            sleep 15
-            curl -fs http://localhost/health      && echo "✅ API OK"      || echo "⚠️ API health check failed"
-            curl -fs http://localhost/ai/health   && echo "✅ AI OK"       || echo "⚠️ AI health check failed"
-            curl -fs http://localhost/nginx-health && echo "✅ Nginx OK"   || echo "⚠️ Nginx health check failed"
+            # Attendre que l'API démarre (migrations EF incluses)
+            echo "Waiting for API to start..."
+            for i in $(seq 1 12); do
+              sleep 10
+              curl -fs http://localhost/health && echo "✅ API OK" && break
+              echo "Attempt $i/12 - API not ready yet..."
+            done || echo "⚠️ API health check failed after 2min"
+            curl -fs http://localhost/ai/health    && echo "✅ AI OK"    || echo "⚠️ AI health check failed"
+            curl -fs http://localhost/nginx-health && echo "✅ Nginx OK" || echo "⚠️ Nginx health check failed"
