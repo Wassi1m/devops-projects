@@ -234,16 +234,16 @@ jobs:
               -u ${{ github.actor }} --password-stdin
 
             # Mettre à jour les images (pull depuis ghcr.io)
-            docker-compose -f docker-compose.prod.yml pull
-
+            docker compose -f docker-compose.prod.yml pull
 
             # Redémarrer les conteneurs mis à jour sans couper les autres
-            docker-compose -f docker-compose.prod.yml up -d --remove-orphans
+            docker compose -f docker-compose.prod.yml up -d --remove-orphans
 
             # Nettoyer les anciennes images inutilisées
             docker image prune -f
 
-            # Vérification santé
+            # Vérification santé via Nginx (load balancer)
             sleep 15
-            curl -fs http://localhost:5000/health && echo "✅ API OK" || echo "⚠️ API health check failed"
-            curl -fs http://localhost:8000/health && echo "✅ AI OK" || echo "⚠️ AI health check failed"
+            curl -fs http://localhost/health      && echo "✅ API OK"      || echo "⚠️ API health check failed"
+            curl -fs http://localhost/ai/health   && echo "✅ AI OK"       || echo "⚠️ AI health check failed"
+            curl -fs http://localhost/nginx-health && echo "✅ Nginx OK"   || echo "⚠️ Nginx health check failed"
