@@ -5,7 +5,7 @@ Agent IA de prédiction des tendances boursières à partir d'images de graphiqu
 Endpoints:
     POST /predict       → Prédire la tendance à partir d'une image
     GET  /health        → Vérifier l'état de l'API
-    GET  /model/info    → Informations sur le modèle
+    GET  /model/info    → Informations sur le  
 """
 
 import os
