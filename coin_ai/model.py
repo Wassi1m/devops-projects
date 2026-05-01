@@ -10,7 +10,7 @@ from torchvision import models
 
 class CoinAIModel(nn.Module):
     """
-    CNN basé sur EfficientNet-B0 (transfer learning).
+    CNN basé sur EfficientNet-B0 (transfer learning)
     Classifieur renforcé avec 2 couches cachées pour mieux capturer les patterns.
     """
 
