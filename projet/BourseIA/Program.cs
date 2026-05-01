@@ -142,6 +142,7 @@ app.UseAuthorization();
 
 app.MapControllers();
 app.MapHub<ChatHub>("/hubs/chat");
+app.MapGet("/health", () => Results.Ok(new { status = "healthy", timestamp = DateTime.UtcNow }));
 
 // ─────────────────────────────────────────────
 // AUTO MIGRATION + DEBUG + RETRY
