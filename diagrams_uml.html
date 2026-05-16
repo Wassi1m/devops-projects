@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>BourseIA — Diagrammes UML (rapport conception)</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+<style>
+  :root{
+    --page:#ffffff; --muted:#f4f4f4; --border:#1a1a1a; --text:#111;
+    --accent:#1a5276; --link:#0b5345;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--page);color:var(--text);font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.45}
+  .hero{border-bottom:2px solid var(--border);padding:1.75rem 2rem;background:var(--muted)}
+  .hero h1{font-size:1.45rem;font-weight:700;letter-spacing:.02em}
+  .hero p{margin-top:.35rem;color:#333;font-size:.92rem}
+  .download{background:#fff;border:2px solid var(--border);margin:1rem 2rem;padding:1rem 1.25rem;border-radius:2px}
+  .download h2{font-size:1rem;margin-bottom:.5rem}
+  .download ul{margin-left:1.25rem}
+  .download a{color:var(--link);text-decoration:underline}
+  .download .zip{font-weight:700;margin-top:.5rem}
+  .tabs{display:flex;flex-wrap:wrap;gap:0;border-bottom:2px solid var(--border);padding:0 1rem;background:var(--page);position:sticky;top:0;z-index:5}
+  .tab{padding:.65rem 1.1rem;cursor:pointer;font-size:.82rem;font-weight:600;color:#444;border-bottom:3px solid transparent;margin-bottom:-2px;user-select:none}
+  .tab:hover{background:var(--muted)}
+  .tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+  .panel{display:none;padding:1.5rem 2rem 2.5rem;max-width:100%}
+  .panel.active{display:block}
+  .note{background:#fffde7;border:1px solid var(--border);padding:.65rem .9rem;font-size:.82rem;margin-bottom:1rem}
+  .section-title{font-size:1rem;font-weight:700;margin:0 0 .75rem;padding-bottom:.35rem;border-bottom:1px solid #ccc}
+  .diag-card{background:var(--page);border:2px solid var(--border);padding:1rem;margin-bottom:1.5rem;border-radius:2px;overflow:auto}
+  .diag-card .mermaid{display:flex;justify-content:center}
+  .legend{font-size:.78rem;color:#333;margin-top:.5rem}
+  .mermaid svg{max-width:100%;height:auto}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <h1>BourseIA — Diagrammes UML (conception cycle ingénieur)</h1>
+  <p>Style clair, fond blanc, associations lisibles — proche des conventions outils type StarUML et des livrables « analyse / conception ». Diagrammes <strong>éclatés</strong> pour limiter le croisement des lignes.</p>
+</div>
+
+<div class="download">
+  <h2>Télécharger les images (PNG et SVG)</h2>
+  <p>Fichiers générés dans le dossier <code>uml_images/</code> :</p>
+  <ul>
+    <li><a href="uml_images/01_classes_coeur_metier.png" download>01_classes_coeur_metier.png</a> · <a href="uml_images/01_classes_coeur_metier.svg" download>SVG</a></li>
+    <li><a href="uml_images/02_classes_espace_trading.png" download>02_classes_espace_trading.png</a> · <a href="uml_images/02_classes_espace_trading.svg" download>SVG</a></li>
+    <li><a href="uml_images/03_use_case_auth_profil.png" download>03_use_case_auth_profil.png</a> · <a href="uml_images/03_use_case_auth_profil.svg" download>SVG</a></li>
+    <li><a href="uml_images/04_use_case_analyse_idees.png" download>04_use_case_analyse_idees.png</a> · <a href="uml_images/04_use_case_analyse_idees.svg" download>SVG</a></li>
+    <li><a href="uml_images/05_use_case_equipes_trading.png" download>05_use_case_equipes_trading.png</a> · <a href="uml_images/05_use_case_equipes_trading.svg" download>SVG</a></li>
+    <li><a href="uml_images/06_sequence_analyse_ia.png" download>06_sequence_analyse_ia.png</a> · <a href="uml_images/06_sequence_analyse_ia.svg" download>SVG</a></li>
+    <li><a href="uml_images/07_sequence_invitation_signalr.png" download>07_sequence_invitation_signalr.png</a> · <a href="uml_images/07_sequence_invitation_signalr.svg" download>SVG</a></li>
+    <li><a href="uml_images/08_sequence_auth_jwt.png" download>08_sequence_auth_jwt.png</a> · <a href="uml_images/08_sequence_auth_jwt.svg" download>SVG</a></li>
+  </ul>
+  <p class="zip"><a href="BourseIA_uml_images.zip" download>Archive ZIP — tous les PNG, SVG, sources .mmd et README</a></p>
+</div>
+
+<div class="tabs">
+  <div class="tab active" data-panel="c1">Classes — cœur métier</div>
+  <div class="tab" data-panel="c2">Classes — trading</div>
+  <div class="tab" data-panel="u1">CU — Auth. / profil</div>
+  <div class="tab" data-panel="u2">CU — Analyse / idées</div>
+  <div class="tab" data-panel="u3">CU — Équipes / trading</div>
+  <div class="tab" data-panel="s1">Séq. — Analyse IA</div>
+  <div class="tab" data-panel="s2">Séq. — Invitation</div>
+  <div class="tab" data-panel="s3">Séq. — JWT</div>
+</div>
+
+<div id="panel-c1" class="panel active">
+  <div class="note"><strong>Lot 1.</strong> Entités collaboratives, courbes, analyse, idées, notifications. Lignes réduites par rapport au diagramme monolithique.</div>
+  <div class="section-title">Diagramme de classes — Cœur métier</div>
+  <div class="diag-card"><div class="mermaid">
+classDiagram
+  direction TB
+  class Utilisateur {
+    +int Id
+    +string Nom
+    +string Prenom
+    +string Email
+    -string MotDePasseHash
+    +DateTime DateInscription
+    +string PhotoProfil
+    +string ProfilInvestisseur
+  }
+  class Team {
+    +int Id
+    +string Nom
+    +string Description
+    +DateTime DateCreation
+    +int CreateurId
+  }
+  class MembreEquipe {
+    +int Id
+    +int UtilisateurId
+    +int TeamId
+    +string Role
+    +string Statut
+    +DateTime DateAdhesion
+    +int InviteParId
+  }
+  class CourbeBoursiere {
+    +int Id
+    +string NomFichier
+    +string CheminFichier
+    +string TypeAction
+    +DateTime DateUpload
+    +string Statut
+    +int UtilisateurId
+  }
+  class ResultatAnalyse {
+    +int Id
+    +string Tendance
+    +double PrixMin
+    +double PrixMax
+    +double PrixMoyen
+    +double EcartType
+    +string PointsCles
+    +string RapportJson
+    +string StatutAnalyse
+    +DateTime DateAnalyse
+    +int CourbeBoursiereId
+  }
+  class IdeeInvestissement {
+    +int Id
+    +string Titre
+    +string Description
+    +string ActionConcernee
+    +string TypeIdee
+    +string Tendance
+    +double RentabiliteEstimee
+    +DateTime DateCreation
+    +bool EstPublique
+    +int UtilisateurId
+    +int TeamId
+    +int ResultatAnalyseId
+  }
+  class CommentaireIdee {
+    +int Id
+    +string Contenu
+    +DateTime DateCreation
+    +int IdeeInvestissementId
+    +int UtilisateurId
+  }
+  class PartageEquipe {
+    +int Id
+    +string Commentaire
+    +DateTime DatePartage
+    +int TeamId
+    +int CourbeBoursiereId
+    +int PartageParId
+  }
+  class MessageChat {
+    +int Id
+    +string Contenu
+    +DateTime DateEnvoi
+    +bool EstLu
+    +string TypeMessage
+    +int ExpediteurId
+    +int DestinataireId
+    +int TeamId
+  }
+  class Notification {
+    +int Id
+    +string Message
+    +string Type
+    +bool EstLue
+    +DateTime DateCreation
+    +string LienAction
+    +int UtilisateurId
+  }
+  Utilisateur "1" *-- "0..*" CourbeBoursiere : possede
+  Utilisateur "1" *-- "0..*" Notification : recoit
+  Utilisateur "1" *-- "0..*" IdeeInvestissement : propose
+  Utilisateur "1" *-- "0..*" CommentaireIdee : commente
+  Utilisateur "1" o-- "0..*" Team : cree
+  Team "1" *-- "1..*" MembreEquipe : regroupe
+  Utilisateur "1" o-- "0..*" MembreEquipe : estMembre
+  Utilisateur "0..1" ..> "0..*" MembreEquipe : invite
+  CourbeBoursiere "1" *-- "0..1" ResultatAnalyse : produit
+  IdeeInvestissement "0..*" o-- "0..1" Team : associeeA
+  IdeeInvestissement "0..*" o-- "0..1" ResultatAnalyse : reference
+  IdeeInvestissement "1" *-- "0..*" CommentaireIdee : recoit
+  Team "1" *-- "0..*" PartageEquipe : contient
+  CourbeBoursiere "1" o-- "0..*" PartageEquipe : partageeVia
+  Utilisateur "1" o-- "0..*" PartageEquipe : partage
+  Team "1" *-- "0..*" MessageChat : canalEquipe
+  Utilisateur "1" *-- "0..*" MessageChat : envoie
+  </div></div>
+  <p class="legend">Composition *-- (cycle de vie lié) · Agrégation o-- · Dépendance ..&gt; (inviteur optionnel).</p>
+</div>
+
+<div id="panel-c2" class="panel">
+  <div class="note"><strong>Lot 2.</strong> Espace trading personnel : peu de classes, relations uniquement vers <em>Utilisateur</em> — lisibilité maximale.</div>
+  <div class="section-title">Diagramme de classes — Espace trading</div>
+  <div class="diag-card"><div class="mermaid">
+classDiagram
+  direction LR
+  class Utilisateur {
+    +int Id
+    +string Nom
+    +string Prenom
+    +string Email
+    -string MotDePasseHash
+    +DateTime DateInscription
+    +string PhotoProfil
+    +string ProfilInvestisseur
+  }
+  class SymboleWatchlist {
+    +int Id
+    +string Ticker
+    +string Libelle
+    +int Ordre
+    +DateTime DateAjout
+    +int UtilisateurId
+  }
+  class AlertePrix {
+    +int Id
+    +string Symbole
+    +double SeuilHaut
+    +double SeuilBas
+    +bool Actif
+    +DateTime DateCreation
+    +int UtilisateurId
+  }
+  class OperationJournal {
+    +int Id
+    +string Symbole
+    +string Type
+    +decimal Quantite
+    +decimal PrixUnitaire
+    +decimal Frais
+    +DateTime DateOperation
+    +string Notes
+    +int UtilisateurId
+  }
+  class NoteRecherche {
+    +int Id
+    +string Titre
+    +string Contenu
+    +string Tags
+    +DateTime DateModification
+    +int UtilisateurId
+  }
+  class ObjectifPortfolio {
+    +int Id
+    +string Nom
+    +decimal MontantCible
+    +decimal MontantActuel
+    +DateTime DateEcheance
+    +int UtilisateurId
+  }
+  Utilisateur "1" *-- "0..*" SymboleWatchlist : watchlist
+  Utilisateur "1" *-- "0..*" AlertePrix : alertes
+  Utilisateur "1" *-- "0..*" OperationJournal : journal
+  Utilisateur "1" *-- "0..*" NoteRecherche : notes
+  Utilisateur "1" *-- "0..*" ObjectifPortfolio : objectifs
+  </div></div>
+</div>
+
+<div id="panel-u1" class="panel">
+  <div class="note">Limite du système (paquetage) et acteurs. Trait plein pour associations rapport (communication).</div>
+  <div class="section-title">Cas d’utilisation — Authentification et profil</div>
+  <div class="diag-card"><div class="mermaid">
+flowchart LR
+  subgraph act["Acteurs"]
+    direction TB
+    V((Visiteur))
+    U((Utilisateur))
+  end
+  subgraph sys["Système BourseIA — Authentification et profil"]
+    direction TB
+    UC1["CU-01 : S'inscrire"]
+    UC2["CU-02 : Se connecter"]
+    UC3["CU-03 : Gérer le profil"]
+    UC4["CU-04 : Mettre à jour la photo de profil"]
+  end
+  V --- UC1
+  V --- UC2
+  U --- UC3
+  U --- UC4
+  </div></div>
+</div>
+
+<div id="panel-u2" class="panel">
+  <div class="section-title">Cas d’utilisation — Analyse IA, idées, Radar Intelligence</div>
+  <div class="diag-card"><div class="mermaid">
+flowchart LR
+  subgraph act["Acteurs"]
+    direction TB
+    V((Visiteur))
+    U((Utilisateur))
+    IA((Service IA))
+  end
+  subgraph sys["Système BourseIA — Analyse, idées, intelligence"]
+    direction TB
+    UC5["CU-05 : Uploader une courbe"]
+    UC6["CU-06 : Lancer l'analyse IA"]
+    UC7["CU-07 : Consulter le résultat"]
+    UC8["CU-08 : Consulter l'historique des analyses"]
+    UC9["CU-09 : Mettre à jour les métadonnées d'une courbe"]
+    UC10["CU-10 : Créer une idée"]
+    UC11["CU-11 : Modifier une idée"]
+    UC12["CU-12 : Supprimer une idée"]
+    UC13["CU-13 : Consulter les idées publiques"]
+    UC14["CU-14 : Commenter une idée"]
+    UC15["CU-15 : Supprimer un commentaire"]
+    UC32["CU-16 : Consulter le Radar Intelligence"]
+  end
+  V --- UC13
+  U --- UC5
+  U --- UC7
+  U --- UC8
+  U --- UC9
+  U --- UC10
+  U --- UC11
+  U --- UC12
+  U --- UC14
+  U --- UC15
+  U --- UC32
+  UC5 -.->|«include»| UC6
+  UC6 --> IA
+  IA -.->|«extend» résultat| UC7
+  </div></div>
+</div>
+
+<div id="panel-u3" class="panel">
+  <div class="section-title">Cas d’utilisation — Équipes, trading, notifications</div>
+  <div class="diag-card"><div class="mermaid">
+flowchart LR
+  subgraph act["Acteurs"]
+    direction TB
+    U((Utilisateur))
+    ADM((Administrateur équipe))
+  end
+  subgraph sys["Système BourseIA — Équipes, trading, notifications"]
+    direction TB
+    UC16["CU-17 : Créer une équipe"]
+    UC17["CU-18 : Inviter / ajouter un membre"]
+    UC18["CU-19 : Répondre à une invitation"]
+    UC19["CU-20 : Gérer les rôles des membres"]
+    UC20["CU-21 : Bannir ou débloquer un membre"]
+    UC21["CU-22 : Partager une courbe dans l'équipe"]
+    UC22["CU-23 : Consulter les courbes partagées"]
+    UC23["CU-24 : Quitter une équipe"]
+    UC24["CU-25 : Échanger sur le chat d'équipe"]
+    UC25["CU-26 : Gérer la watchlist"]
+    UC26["CU-27 : Gérer les alertes de prix"]
+    UC27["CU-28 : Gérer le journal des opérations"]
+    UC28["CU-29 : Gérer les notes de recherche"]
+    UC29["CU-30 : Gérer les objectifs de portefeuille"]
+    UC30["CU-31 : Recevoir une notification temps réel"]
+    UC31["CU-32 : Marquer une notification comme lue"]
+  end
+  U --- UC16
+  U --- UC18
+  U --- UC21
+  U --- UC22
+  U --- UC23
+  U --- UC24
+  U --- UC25
+  U --- UC26
+  U --- UC27
+  U --- UC28
+  U --- UC29
+  U --- UC30
+  U --- UC31
+  ADM --- UC17
+  ADM --- UC19
+  ADM --- UC20
+  UC17 -.->|«include»| UC30
+  </div></div>
+</div>
+
+<div id="panel-s1" class="panel">
+  <div class="section-title">Diagramme de séquence — Upload et analyse IA</div>
+  <div class="diag-card"><div class="mermaid">
+sequenceDiagram
+  autonumber
+  actor U as Utilisateur
+  participant F as Frontend
+  participant API as Contrôleurs API (.NET)
+  participant DB as PostgreSQL
+  participant IA as Service IA (FastAPI)
+  U->>F: Choisit fichier et type d'action
+  F->>API: POST /api/upload [JWT + multipart]
+  API->>API: Valide fichier (extensions, taille max.)
+  API->>DB: INSERT Courbeboursiere (statut = en attente)
+  DB-->>API: identifiant courbe
+  API-->>F: 201 Created
+  F-->>U: Affiche confirmation
+  U->>F: Demande analyse
+  F->>API: POST /api/analysis/analyser/{id} [JWT]
+  API->>DB: SELECT courbe et contrôle propriétaire
+  API->>DB: UPSERT ResultatAnalyse (en cours)
+  API->>IA: POST /predict
+  activate IA
+  IA-->>API: Résultat inférence ou erreur
+  deactivate IA
+  alt Analyse réussie
+    API->>DB: UPDATE ResultatAnalyse (terminé) et courbe (analysé)
+    API-->>F: 200 OK (résultat)
+    F-->>U: Affiche tendance et indicateurs
+  else Échec service IA
+    API->>DB: UPDATE ResultatAnalyse (erreur)
+    API-->>F: 200 OK (statut erreur)
+    F-->>U: Affiche message d'erreur
+  end
+  </div></div>
+</div>
+
+<div id="panel-s2" class="panel">
+  <div class="section-title">Diagramme de séquence — Invitation / ajout membre et SignalR</div>
+  <div class="diag-card"><div class="mermaid">
+sequenceDiagram
+  autonumber
+  actor ADM as Admin équipe
+  actor MB as Membre invité
+  participant FA as Front admin
+  participant FM as Front membre
+  participant API as API équipes
+  participant DB as PostgreSQL
+  participant HUB as Hub SignalR
+  ADM->>FA: Saisit e-mail et valide invitation
+  FA->>API: POST /api/team/inviter [JWT]
+  API->>DB: Recherche utilisateur (e-mail normalisé)
+  API->>DB: INSERT MembreEquipe (statut accepté)
+  API->>DB: INSERT Notification (destinataire = membre)
+  API->>HUB: Notification temps réel (groupe utilisateur)
+  HUB-->>FM: Événement nouvelle notification
+  FM-->>MB: Mise à jour interface
+  API->>HUB: Événement équipe (actualisation liste)
+  HUB-->>FA: Rafraîchissement membres
+  API-->>FA: 200 OK
+  MB->>FM: Ouvre le tableau de bord
+  FM->>API: GET /api/team [JWT]
+  API->>DB: Liste des équipes du membre
+  API-->>FM: Liste des équipes
+  FM-->>MB: Affiche « Mes équipes »
+  </div></div>
+</div>
+
+<div id="panel-s3" class="panel">
+  <div class="section-title">Diagramme de séquence — Inscription, connexion, JWT</div>
+  <div class="diag-card"><div class="mermaid">
+sequenceDiagram
+  autonumber
+  actor U as Utilisateur
+  participant F as Frontend
+  participant AUTH as Auth / UserService
+  participant DB as PostgreSQL
+  participant JWT as Émission JWT
+  rect rgb(240, 240, 240)
+    Note over U, JWT: Inscription
+    U->>F: Saisit données inscription
+    F->>AUTH: POST /api/auth/register
+    AUTH->>AUTH: Normalise e-mail, hachage mot de passe
+    AUTH->>DB: INSERT Utilisateur
+    AUTH->>JWT: Génère jeton JWT
+    JWT-->>AUTH: Jeton + échéance
+    AUTH-->>F: 200 OK + jeton
+    F-->>U: Accès application
+  end
+  rect rgb(240, 240, 240)
+    Note over U, JWT: Connexion
+    U->>F: Saisit e-mail et mot de passe
+    F->>AUTH: POST /api/auth/login
+    AUTH->>DB: SELECT Utilisateur
+    AUTH->>AUTH: Vérification mot de passe
+    alt Identifiants valides
+      AUTH->>JWT: Génère jeton
+      AUTH-->>F: 200 OK + jeton
+      F-->>U: Session ouverte
+    else Identifiants invalides
+      AUTH-->>F: 401 Non autorisé
+      F-->>U: Message d'erreur
+    end
+  end
+  rect rgb(240, 240, 240)
+    Note over U, JWT: Accès protégé
+    U->>F: Action nécessitant authentification
+    F->>AUTH: Requête HTTP + Authorization Bearer
+    AUTH->>JWT: Valide signature et expiration
+    alt Jeton valide
+      AUTH->>DB: Traitement métier
+      AUTH-->>F: 200 OK
+    else Jeton invalide ou expiré
+      AUTH-->>F: 401 Non autorisé
+    end
+  end
+  </div></div>
+</div>
+
+<script>
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: 'base',
+    themeVariables: {
+      background: '#ffffff',
+      mainBkg: '#ffffff',
+      primaryColor: '#fff9e6',
+      primaryTextColor: '#000000',
+      primaryBorderColor: '#000000',
+      lineColor: '#000000',
+      secondaryColor: '#f5f5f5',
+      tertiaryColor: '#ebebeb',
+      textColor: '#000000',
+      nodeBorder: '#000000',
+      clusterBkg: '#fafafa',
+      clusterBorder: '#000000',
+      titleColor: '#000000',
+      edgeLabelBackground: '#ffffff',
+      actorBkg: '#ffffff',
+      actorBorder: '#000000',
+      actorTextColor: '#000000',
+      actorLineColor: '#000000',
+      signalColor: '#000000',
+      signalTextColor: '#000000',
+      labelBoxBkgColor: '#ffffff',
+      labelBoxBorderColor: '#000000',
+      labelTextColor: '#000000',
+      noteBorderColor: '#000000',
+      noteBkgColor: '#fffde7',
+      noteTextColor: '#000000',
+      sequenceNumberColor: '#ffffff'
+    },
+    flowchart: { useMaxWidth: false, htmlLabels: true, curve: 'basis' },
+    classDiagram: { useMaxWidth: false },
+    sequence: { useMaxWidth: false, mirrorActors: false }
+  });
+
+  document.querySelectorAll('.tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      const name = tab.dataset.panel;
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+      tab.classList.add('active');
+      document.getElementById('panel-' + name).classList.add('active');
+      setTimeout(() => {
+        const container = document.getElementById('panel-' + name);
+        container.querySelectorAll('.mermaid[data-processed]').forEach(el => {
+          el.removeAttribute('data-processed');
+          el.innerHTML = el.getAttribute('data-src') || el.innerHTML;
+        });
+        mermaid.init(undefined, '#panel-' + name + ' .mermaid:not([data-processed])');
+      }, 40);
+    });
+  });
+</script>
+</body>
+</html>
